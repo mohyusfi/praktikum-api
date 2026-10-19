@@ -1,0 +1,16 @@
+info:
+  name: Tabel 4.3 - REST Destinations 1
+  type: http
+  seq: 17
+
+http:
+  method: GET
+  url: "{{base_url}}/destinations/1"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

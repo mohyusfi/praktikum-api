@@ -1,3 +1,11 @@
+console.log(`
+   1. MOH. YUSFI LAKAFIDUN — F5512520089
+   2. ALIFIAS — F5512520099
+   3. AKHSAN MAULANA R. — F5512530114 
+   4. NEFALDI — F5512520082
+   5. ILHAM ARIFIN — F5512530109
+  `);
+
 const http = require("http");
 const fs = require("fs/promises");
 const path = require("path");
@@ -6,16 +14,6 @@ const { buildSchema, graphql } = require("graphql");
 const PORT = 3000;
 const DATA_FILE = path.join(__dirname, "data", "destinations.json");
 const REGION_FILE = path.join(__dirname, "data", "regions.json");
-const FIELD_WAJIB = ["name", "region", "category"];
-
-function cekFieldWajib(input) {
-  if (input === null || typeof input !== "object" || Array.isArray(input)) {
-    return FIELD_WAJIB;
-  }
-  return FIELD_WAJIB.filter(
-    (field) => typeof input[field] !== "string" || input[field].trim() === "",
-  );
-}
 
 function buatError(statusCode, pesan) {
   const err = new Error(pesan);
@@ -70,15 +68,6 @@ function bacaBody(req) {
   });
 }
 
-function cekFieldWajib(input) {
-  if (input === null || typeof input !== "object" || Array.isArray(input)) {
-    return FIELD_WAJIB;
-  }
-  return FIELD_WAJIB.filter(
-    (field) => typeof input[field] !== "string" || input[field].trim() === "",
-  );
-}
-
 async function periksaDestinasi(input) {
   if (input === null || typeof input !== "object" || Array.isArray(input)) {
     throw buatError(400, "Data destinasi harus berupa object");
@@ -118,12 +107,12 @@ async function tambahDestinasi(req, res) {
   kirimJSON(res, 201, item);
 }
 
-// ---------- handler ----------
+// ---------- handler REST ----------
 async function daftarDestinasi(req, res, url) {
   let data = await bacaData();
   const kategori = url.searchParams.get("category");
   if (kategori) {
-    data = data.filter((item) => item.category === kategori);
+    data = data.filter((item) => item.category.toLowerCase() === kategori.toLowerCase());
   }
   kirimJSON(res, 200, data);
 }
@@ -187,29 +176,115 @@ async function hapusDestinasi(req, res, id) {
   res.end();
 }
 
-function kirimError(res, statusCode, pesan) {
-  kirimJSON(res, statusCode, { error: pesan });
-}
-
+// ---------- GraphQL Schema ----------
 const schema = buildSchema(`
-    type Destination {
-        id: ID!
-        name: String!
-        category: String
-    }
+  type Destination {
+    id: ID!
+    name: String!
+    category: String
+    region: Region
+  }
 
-    type Query {
-        destinations: [Destination]
-        destination(id: ID!): Destination
-    }
+  type Region {
+    id: ID!
+    name: String!
+    latitude: Float
+    longitude: Float
+    destinations: [Destination]
+    weather: Weather
+  }
+
+  type Weather {
+    temperature: Float
+    windSpeed: Float
+    humidity: Float
+    time: String
+  }
+
+  type Query {
+    destinations(category: String): [Destination]
+    destination(id: ID!): Destination
+    regions: [Region]
+    region(id: ID!): Region
+  }
+
+  type Mutation {
+    createDestination(
+      name: String!
+      category: String!
+      regionId: ID!
+    ): Destination
+    updateDestination(
+      id: ID!
+      name: String!
+      category: String!
+      regionId: ID!
+    ): Destination
+    deleteDestination(id: ID!): Destination
+  }
 `);
 
-// ---------- graphql: resolver ----------
+// ---------- GraphQL Resolvers & Helpers ----------
+async function ambilCuaca(region) {
+  const url =
+    "https://api.open-meteo.com/v1/forecast" +
+    `?latitude=${region.latitude}&longitude=${region.longitude}` +
+    "&current=temperature_2m,wind_speed_10m,relative_humidity_2m" +
+    "&timezone=Asia/Makassar";
+
+  console.log(` memanggil Open-Meteo untuk: ${region.name}`);
+  const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+
+  if (!res.ok) {
+    throw new Error(`Open-Meteo menjawab dengan status ${res.status}`);
+  }
+
+  const hasil = await res.json();
+
+  return {
+    temperature: hasil.current.temperature_2m,
+    windSpeed: hasil.current.wind_speed_10m,
+    humidity: hasil.current.relative_humidity_2m,
+    time: hasil.current.time,
+  };
+}
+
+function lengkapiRegion(region) {
+  return {
+    ...region,
+    destinations: async () => {
+      console.log(` resolver destinations dijalankan untuk region: ${region.name}`);
+      const all = await bacaData();
+      return all
+        .filter((d) => d.regionId === region.id)
+        .map(lengkapiDestinasi);
+    },
+    weather: () => ambilCuaca(region),
+  };
+}
+
+function lengkapiDestinasi(item) {
+  return {
+    ...item,
+    region: async () => {
+      console.log(` resolver region dijalankan untuk: ${item.name}`);
+      const regions = await bacaRegions();
+      const region = regions.find((r) => r.id === item.regionId);
+      return region ? lengkapiRegion(region) : null;
+    },
+  };
+}
+
 const resolver = {};
 
-resolver.destinations = async () => {
-  const data = await bacaData();
-  return data;
+resolver.destinations = async (args) => {
+  let data = await bacaData();
+  if (args && args.category) {
+    data = data.filter(
+      (item) => item.category && item.category.toLowerCase() === args.category.toLowerCase()
+    );
+  }
+  return data.map(lengkapiDestinasi);
 };
 
 resolver.destination = async (args) => {
@@ -218,10 +293,54 @@ resolver.destination = async (args) => {
   if (!item) {
     throw new Error(`Destinasi dengan id ${args.id} tidak ditemukan`);
   }
-  return item;
+  return lengkapiDestinasi(item);
 };
 
-// ---------- graphql: handler ----------
+resolver.regions = async () => {
+  const regions = await bacaRegions();
+  return regions.map(lengkapiRegion);
+};
+
+resolver.region = async (args) => {
+  const regions = await bacaRegions();
+  const item = regions.find((r) => r.id === Number(args.id));
+  if (!item) {
+    throw new Error(`Region dengan id ${args.id} tidak ditemukan`);
+  }
+  return lengkapiRegion(item);
+};
+
+resolver.createDestination = async (args) => {
+  const item = await buatDestinasi(args);
+  return lengkapiDestinasi(item);
+};
+
+resolver.updateDestination = async (args) => {
+  const id = Number(args.id);
+  const data = await bacaData();
+  const index = data.findIndex((d) => d.id === id);
+  if (index === -1) {
+    throw new Error(`Destinasi dengan id ${args.id} tidak ditemukan`);
+  }
+  const bersih = await periksaDestinasi(args);
+  data[index] = { id: id, ...bersih };
+  await simpanData(data);
+  return lengkapiDestinasi(data[index]);
+};
+
+resolver.deleteDestination = async (args) => {
+  const id = Number(args.id);
+  const data = await bacaData();
+  const index = data.findIndex((d) => d.id === id);
+  if (index === -1) {
+    throw new Error(`Destinasi dengan id ${args.id} tidak ditemukan`);
+  }
+  const [terhapus] = data.splice(index, 1);
+  await simpanData(data);
+  return lengkapiDestinasi(terhapus);
+};
+
+// ---------- GraphQL Handler ----------
 async function tanganiGraphQL(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -239,12 +358,13 @@ async function tanganiGraphQL(req, res) {
     schema: schema,
     source: body.query,
     rootValue: resolver,
+    variableValues: body.variables,
   });
 
   kirimJSON(res, 200, hasil);
 }
 
-// --------- router ---------
+// --------- Router ---------
 async function router(req, res) {
   const url = new URL(req.url, "http://localhost");
   const segmen = url.pathname.split("/").filter(Boolean);
@@ -290,7 +410,7 @@ async function router(req, res) {
   );
 }
 
-// --------- server ---------
+// --------- Server ---------
 const server = http.createServer(async (req, res) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
   try {

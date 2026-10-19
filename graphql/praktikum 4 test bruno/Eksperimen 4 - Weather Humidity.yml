@@ -1,0 +1,32 @@
+info:
+  name: Eksperimen 4 - Weather Humidity
+  type: graphql
+  seq: 16
+
+graphql:
+  method: POST
+  url: "{{base_url}}/graphql"
+  body:
+    query: |
+      query {
+        destination(id: 5) {
+          name
+          region {
+            name
+            weather {
+              temperature
+              windSpeed
+              humidity
+              time
+            }
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

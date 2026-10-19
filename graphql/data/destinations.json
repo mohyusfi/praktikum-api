@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "name": "Danau Poso",
+    "name": "Danau Poso Indah",
     "category": "danau",
     "regionId": 2
   },
@@ -28,17 +28,5 @@
     "name": "Pantai Talise",
     "category": "pantai",
     "regionId": 1
-  },
-  {
-    "id": 7,
-    "name": "Air Terjun Wera",
-    "category": "alam",
-    "regionId": 5
-  },
-  {
-    "id": 8,
-    "name": "Air Terjun Wera",
-    "category": "alam",
-    "regionId": 5
   }
 ]

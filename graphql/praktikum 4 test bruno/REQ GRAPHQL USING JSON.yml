@@ -1,0 +1,22 @@
+info:
+  name: REQ GRAPHQL USING JSON
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query { destinations { name category } }"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,26 @@
+info:
+  name: Tabel 4.3 - GraphQL Query B
+  type: graphql
+  seq: 19
+
+graphql:
+  method: POST
+  url: "{{base_url}}/graphql"
+  body:
+    query: |
+      query {
+        destination(id: 1) {
+          name
+          region {
+            name
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

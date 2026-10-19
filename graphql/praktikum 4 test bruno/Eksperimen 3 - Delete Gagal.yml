@@ -1,0 +1,24 @@
+info:
+  name: Eksperimen 3 - Delete Gagal
+  type: graphql
+  seq: 15
+
+graphql:
+  method: POST
+  url: "{{base_url}}/graphql"
+  body:
+    query: |
+      mutation {
+        deleteDestination(id: 999) {
+          id
+          name
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

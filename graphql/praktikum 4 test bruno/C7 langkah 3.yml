@@ -1,0 +1,27 @@
+info:
+  name: C7 langkah 3
+  type: graphql
+  seq: 7
+
+graphql:
+  method: POST
+  url: "{{base_url}}/graphql"
+  body:
+    query: |
+      mutation {
+        createDestination(name: "Pulau Kadidiri", category: "bahari", regionId: 4) {
+          id
+          name
+          region {
+            name
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

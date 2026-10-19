@@ -1,0 +1,56 @@
+info:
+  name: 2. Create User - Success (201)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/users"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Antigravity Test User",
+        "email": "{{newEmail}}",
+        "gender": "male",
+        "status": "active"
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.name
+      operator: eq
+      value: "Antigravity Test User"
+  scripts:
+    - type: before-request
+      code: |
+        const randomEmail = 'user_' + Date.now() + '@example.com';
+        bru.setVar('newEmail', randomEmail);
+    - type: tests
+      code: |
+        test("Status code is 201 Created", function() {
+          expect(res.getStatus()).to.equal(201);
+        });
+        test("User was created with correct fields", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('id');
+          expect(body.name).to.equal("Antigravity Test User");
+          expect(body.status).to.equal("active");
+          bru.setVar('createdUserId', body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

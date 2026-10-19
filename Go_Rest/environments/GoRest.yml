@@ -1,0 +1,14 @@
+name: GoRest
+variables:
+  - name: baseUrl
+    value: https://gorest.co.in/public/v2
+  - name: token
+    value: 524981878478b0ab23a3abeebcfe5f540f3bc57729237b800ffb3fc1c10f57ef
+  - name: userId
+    value: "1001"
+  - name: postId
+    value: "501"
+  - name: commentId
+    value: "301"
+  - name: todoId
+    value: "701"

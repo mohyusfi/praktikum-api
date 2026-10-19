@@ -1,0 +1,53 @@
+info:
+  name: 7. Update User (PUT) - Success (200)
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/users/{{userId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Updated User Full",
+        "email": "{{updatedEmail}}",
+        "gender": "male",
+        "status": "active"
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.name
+      operator: eq
+      value: "Updated User Full"
+  scripts:
+    - type: before-request
+      code: |
+        const randomEmail = 'updated_' + Date.now() + '@example.com';
+        bru.setVar('updatedEmail', randomEmail);
+    - type: tests
+      code: |
+        test("Status code is 200 OK", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("User updated successfully", function() {
+          const body = res.getBody();
+          expect(body.name).to.equal("Updated User Full");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

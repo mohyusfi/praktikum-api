@@ -1,0 +1,49 @@
+info:
+  name: 4. Create User - Unauthorized (401)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/users"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "invalid_bearer_token_testing_401"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Unauthorized User",
+        "email": "unauth@example.com",
+        "gender": "male",
+        "status": "active"
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "401"
+    - expression: res.body.message
+      operator: eq
+      value: "Authentication failed"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 401 Unauthorized", function() {
+          expect(res.getStatus()).to.equal(401);
+        });
+        test("Error message indicates Authentication failed", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('message', 'Authentication failed');
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

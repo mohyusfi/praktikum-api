@@ -1,0 +1,54 @@
+info:
+  name: 6. Create Post Comment - Success (201)
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/posts/{{postId}}/comments"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Jane Commenter",
+        "email": "{{commentEmail}}",
+        "body": "This is a great API test comment created by Antigravity."
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.name
+      operator: eq
+      value: "Jane Commenter"
+  scripts:
+    - type: before-request
+      code: |
+        const randomEmail = 'comment_' + Date.now() + '@example.com';
+        bru.setVar('commentEmail', randomEmail);
+    - type: tests
+      code: |
+        test("Status code is 201 Created", function() {
+          expect(res.getStatus()).to.equal(201);
+        });
+        test("Comment created successfully", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('id');
+          expect(body.name).to.equal("Jane Commenter");
+          bru.setVar('createdCommentId', body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

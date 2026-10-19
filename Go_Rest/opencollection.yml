@@ -1,0 +1,22 @@
+opencollection: 1.0.0
+
+info:
+  name: Go REST
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+bundled: false
+extensions:
+  bruno:
+    defaultEnvironment: GoRest
+    ignore:
+      - node_modules
+      - .git

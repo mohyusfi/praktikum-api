@@ -1,0 +1,46 @@
+info:
+  name: 3. Create Post - Validation Error (422)
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/posts"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {}
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "422"
+    - expression: res.body[0].field
+      operator: isDefined
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 422 Unprocessable Entity", function() {
+          expect(res.getStatus()).to.equal(422);
+        });
+        test("Validation errors returned for required fields", function() {
+          const body = res.getBody();
+          expect(Array.isArray(body)).to.be.true;
+          const fields = body.map(e => e.field);
+          expect(fields).to.include('title');
+          expect(fields).to.include('body');
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

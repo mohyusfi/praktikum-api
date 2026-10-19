@@ -1,0 +1,49 @@
+info:
+  name: 1. Get All Users
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/users"
+  params:
+    - name: page
+      value: "1"
+      type: query
+    - name: per_page
+      value: "10"
+      type: query
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.length
+      operator: gt
+      value: "0"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 200", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("Response is an array with users", function() {
+          const body = res.getBody();
+          expect(Array.isArray(body)).to.be.true;
+          expect(body.length).to.be.above(0);
+          expect(body[0]).to.have.property('id');
+          expect(body[0]).to.have.property('email');
+          // Simpan ID user pertama untuk request berikutnya
+          bru.setVar('userId', body[0].id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,14 @@
+{
+  "name": "praktikum-2",
+  "version": "1.0.0",
+  "description": "belajar rest api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "@types/node": "^26.6.2"
+  }
+}

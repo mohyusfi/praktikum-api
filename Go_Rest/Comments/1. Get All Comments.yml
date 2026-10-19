@@ -1,0 +1,44 @@
+info:
+  name: 1. Get All Comments
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/comments"
+  params:
+    - name: page
+      value: "1"
+      type: query
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.length
+      operator: gt
+      value: "0"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 200 OK", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("Response is array of comments", function() {
+          const body = res.getBody();
+          expect(Array.isArray(body)).to.be.true;
+          expect(body.length).to.be.above(0);
+          bru.setVar('commentId', body[0].id);
+          bru.setVar('commentPostId', body[0].post_id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,48 @@
+info:
+  name: 9. Create User Post - Success (201)
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseUrl}}/users/{{userId}}/posts"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Nested User Post Title",
+        "body": "This post is created directly under a specific user endpoint."
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.title
+      operator: eq
+      value: "Nested User Post Title"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 201 Created", function() {
+          expect(res.getStatus()).to.equal(201);
+        });
+        test("Post created for specific user", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('id');
+          expect(body.title).to.equal("Nested User Post Title");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

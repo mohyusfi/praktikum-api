@@ -1,0 +1,44 @@
+info:
+  name: 8. Create User Todo - Validation Error (422)
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/users/{{userId}}/todos"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {}
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "422"
+    - expression: res.body[0].field
+      operator: isDefined
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 422 Unprocessable Entity", function() {
+          expect(res.getStatus()).to.equal(422);
+        });
+        test("Validation errors returned", function() {
+          const body = res.getBody();
+          expect(Array.isArray(body)).to.be.true;
+          expect(body.length).to.be.above(0);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

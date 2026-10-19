@@ -1,0 +1,50 @@
+info:
+  name: 2. Create Post - Success (201)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/posts"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": {{userId}},
+        "title": "Antigravity Post Title Test",
+        "body": "This is the body content of the test post created by Antigravity."
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.title
+      operator: eq
+      value: "Antigravity Post Title Test"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 201 Created", function() {
+          expect(res.getStatus()).to.equal(201);
+        });
+        test("Post was created successfully", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('id');
+          expect(body.title).to.equal("Antigravity Post Title Test");
+          bru.setVar('createdPostId', body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

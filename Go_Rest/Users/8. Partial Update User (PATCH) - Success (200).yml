@@ -1,0 +1,46 @@
+info:
+  name: 8. Partial Update User (PATCH) - Success (200)
+  type: http
+  seq: 8
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/users/{{userId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "status": "inactive"
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.status
+      operator: eq
+      value: "inactive"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 200 OK", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("User status updated to inactive", function() {
+          const body = res.getBody();
+          expect(body.status).to.equal("inactive");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

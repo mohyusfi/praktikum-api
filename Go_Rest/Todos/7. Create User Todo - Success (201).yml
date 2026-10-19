@@ -1,0 +1,50 @@
+info:
+  name: 7. Create User Todo - Success (201)
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/users/{{userId}}/todos"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Complete Antigravity API testing",
+        "due_on": "2026-10-01T00:00:00.000+05:30",
+        "status": "pending"
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.title
+      operator: eq
+      value: "Complete Antigravity API testing"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 201 Created", function() {
+          expect(res.getStatus()).to.equal(201);
+        });
+        test("Todo created successfully", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('id');
+          expect(body.title).to.equal("Complete Antigravity API testing");
+          bru.setVar('createdTodoId', body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

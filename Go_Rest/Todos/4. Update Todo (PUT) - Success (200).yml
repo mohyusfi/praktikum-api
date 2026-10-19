@@ -1,0 +1,49 @@
+info:
+  name: 4. Update Todo (PUT) - Success (200)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/todos/{{todoId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": {{userId}},
+        "title": "Updated Todo Title",
+        "due_on": "2026-10-01T00:00:00.000+05:30",
+        "status": "completed"
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.status
+      operator: eq
+      value: "completed"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 200 OK", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("Todo status updated to completed", function() {
+          const body = res.getBody();
+          expect(body.status).to.equal("completed");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,40 @@
+info:
+  name: 2. Get Comment By ID - Success (200)
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/comments/{{commentId}}"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: isDefined
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 200 OK", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("Comment contains required fields", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('id');
+          expect(body).to.have.property('post_id');
+          expect(body).to.have.property('name');
+          expect(body).to.have.property('email');
+          expect(body).to.have.property('body');
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

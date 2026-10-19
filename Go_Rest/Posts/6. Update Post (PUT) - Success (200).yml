@@ -1,0 +1,48 @@
+info:
+  name: 6. Update Post (PUT) - Success (200)
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/posts/{{postId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{token}}"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": {{userId}},
+        "title": "Updated Post Title",
+        "body": "Updated post body content by Antigravity test runner."
+      }
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.title
+      operator: eq
+      value: "Updated Post Title"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 200 OK", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("Title was updated", function() {
+          const body = res.getBody();
+          expect(body.title).to.equal("Updated Post Title");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

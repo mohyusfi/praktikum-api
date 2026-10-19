@@ -1,0 +1,30 @@
+info:
+  name: 9. Delete User - Success (204)
+  type: http
+  seq: 9
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/users/{{createdUserId}}"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 204 No Content", function() {
+          expect(res.getStatus()).to.equal(204);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

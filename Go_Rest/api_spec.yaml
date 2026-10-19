@@ -1,0 +1,766 @@
+openapi: 3.0.3
+info:
+  title: Go REST API
+  description: Dokumentasi API Go REST v2 terpisah per resource dengan error case lengkap.
+  version: 2.0.0
+servers:
+  - url: https://gorest.co.in/public/v2
+    description: Production Server
+
+tags:
+  - name: Users
+    description: Manajemen data pengguna
+  - name: Posts
+    description: Manajemen postingan dan artikel
+  - name: Comments
+    description: Interaksi komentar pada postingan
+  - name: Todos
+    description: Manajemen tugas/todo list
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ================= SECTION: USERS =================
+  /users:
+    get:
+      tags: [Users]
+      summary: Ambil daftar pengguna
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: gender
+          in: query
+          schema:
+            type: string
+            enum: [male, female]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags: [Users]
+      summary: Buat pengguna baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Users]
+      summary: Ambil detail pengguna
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Users]
+      summary: Ganti seluruh data pengguna (Full update)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+    patch:
+      tags: [Users]
+      summary: Perbarui sebagian data pengguna (Partial update)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                gender:
+                  type: string
+                  enum: [male, female]
+                status:
+                  type: string
+                  enum: [active, inactive]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+    delete:
+      tags: [Users]
+      summary: Hapus pengguna
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ================= SECTION: POSTS =================
+  /posts:
+    get:
+      tags: [Posts]
+      summary: Ambil daftar postingan
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags: [Posts]
+      summary: Buat postingan baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+
+  /posts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Posts]
+      summary: Ambil detail postingan
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Posts]
+      summary: Update postingan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+    delete:
+      tags: [Posts]
+      summary: Hapus postingan
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{id}/posts:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Posts]
+      summary: Ambil postingan milik pengguna tertentu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    post:
+      tags: [Posts]
+      summary: Buat postingan untuk pengguna tertentu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, body]
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+
+  # ================= SECTION: COMMENTS =================
+  /comments:
+    get:
+      tags: [Comments]
+      summary: Ambil semua komentar
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+
+  /comments/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Comments]
+      summary: Ambil detail komentar
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      tags: [Comments]
+      summary: Hapus komentar
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /posts/{id}/comments:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Comments]
+      summary: Ambil komentar dari postingan tertentu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    post:
+      tags: [Comments]
+      summary: Tambah komentar ke postingan tertentu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, body]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                body:
+                  type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+
+  # ================= SECTION: TODOS =================
+  /todos:
+    get:
+      tags: [Todos]
+      summary: Ambil daftar todo
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+
+  /todos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Todos]
+      summary: Ambil detail todo
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Todos]
+      summary: Update status atau isi todo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+    delete:
+      tags: [Todos]
+      summary: Hapus todo
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{id}/todos:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Todos]
+      summary: Ambil daftar todo milik pengguna tertentu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    post:
+      tags: [Todos]
+      summary: Buat todo untuk pengguna tertentu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, status]
+              properties:
+                title:
+                  type: string
+                due_on:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                  enum: [pending, completed]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequestError:
+      description: Bad request (Parameter atau format request body tidak valid)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Bad request
+    UnauthorizedError:
+      description: Authentication failed (Bearer token tidak valid atau tidak disertakan)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Authentication failed
+    NotFoundError:
+      description: Resource not found (Data tidak ditemukan)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Resource not found
+    UnprocessableEntityError:
+      description: Validation Failed (Validasi field data gagal)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+          example:
+            - field: email
+              message: can't be blank
+            - field: name
+              message: can't be blank
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Resource not found
+
+    ValidationErrorItem:
+      type: object
+      properties:
+        field:
+          type: string
+          example: email
+        message:
+          type: string
+          example: can't be blank
+
+    ValidationErrorResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/ValidationErrorItem'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1001
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        gender:
+          type: string
+          enum: [male, female]
+          example: male
+        status:
+          type: string
+          enum: [active, inactive]
+          example: active
+
+    UserInput:
+      type: object
+      required: [name, email, gender, status]
+      properties:
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        gender:
+          type: string
+          enum: [male, female]
+          example: male
+        status:
+          type: string
+          enum: [active, inactive]
+          example: active
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 501
+        user_id:
+          type: integer
+          example: 1001
+        title:
+          type: string
+          example: Judul Postingan
+        body:
+          type: string
+          example: Isi konten postingan.
+
+    PostInput:
+      type: object
+      required: [user_id, title, body]
+      properties:
+        user_id:
+          type: integer
+          example: 1001
+        title:
+          type: string
+          example: Judul Postingan
+        body:
+          type: string
+          example: Isi konten postingan.
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 301
+        post_id:
+          type: integer
+          example: 501
+        name:
+          type: string
+          example: Jane Doe
+        email:
+          type: string
+          format: email
+          example: jane.doe@example.com
+        body:
+          type: string
+          example: Komentar postingan.
+
+    Todo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 701
+        user_id:
+          type: integer
+          example: 1001
+        title:
+          type: string
+          example: Task testing API
+        due_on:
+          type: string
+          format: date-time
+          example: '2026-10-01T00:00:00.000+05:30'
+        status:
+          type: string
+          enum: [pending, completed]
+          example: pending
+
+    TodoInput:
+      type: object
+      required: [user_id, title, status]
+      properties:
+        user_id:
+          type: integer
+          example: 1001
+        title:
+          type: string
+          example: Task testing API
+        due_on:
+          type: string
+          format: date-time
+          example: '2026-10-01T00:00:00.000+05:30'
+        status:
+          type: string
+          enum: [pending, completed]
+          example: pending

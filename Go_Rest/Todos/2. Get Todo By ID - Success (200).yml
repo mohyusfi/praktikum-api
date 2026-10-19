@@ -1,0 +1,39 @@
+info:
+  name: 2. Get Todo By ID - Success (200)
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/todos/{{todoId}}"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: isDefined
+  scripts:
+    - type: tests
+      code: |
+        test("Status code is 200 OK", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("Todo contains expected fields", function() {
+          const body = res.getBody();
+          expect(body).to.have.property('id');
+          expect(body).to.have.property('user_id');
+          expect(body).to.have.property('title');
+          expect(body).to.have.property('status');
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

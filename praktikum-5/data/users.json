@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "username": "fald",
+    "role": "editor",
+    "salt": "54fde2f9cfbad218826388878f0ebd5f",
+    "passwordHash": "0502358d26302b605dbfea9e0c56bfb8e1ba2d574f30673f747829a0b93aebd1"
+  }
+]
